@@ -22,6 +22,7 @@ async function run() {
         const bicycleCollection = database.collection('bicycles');
         const orderCollection = database.collection('orders');
         const usersCollection = database.collection('users');
+        const reviewsCollection = database.collection('reviews');
 
         app.get('/', async (req, res) => {
             res.send('Bicycle Ride Server Running')
@@ -70,12 +71,14 @@ async function run() {
             res.json('delete success')
         })
 
+        // saving register users to database
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.json(result);
         })
 
+        // saving logged in users to database
         app.put('/users', async (req, res) => {
             const user = req.body;
 
@@ -88,6 +91,7 @@ async function run() {
 
         })
 
+        // making admin
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
             const filter = { email: user.email };
@@ -97,6 +101,7 @@ async function run() {
             res.json(result);
         })
 
+        // check an user has admin role
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -106,6 +111,27 @@ async function run() {
                 isAdmin = true;
             }
             res.json({ admin: isAdmin })
+        })
+
+        // admin adding products to database
+        app.post('/addProduct', async (req, res) => {
+            const product = req.body;
+            const result = await bicycleCollection.insertOne(product);
+            res.json(result)
+        })
+
+        // get reviews from database
+        app.get('/reviews', async (req, res) => {
+            const cursor = reviewsCollection.find({});
+            const result = await cursor.toArray();
+            res.json(result);
+        })
+
+        // take review from user
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.json(result);
         })
     }
     finally {
