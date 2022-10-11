@@ -4,6 +4,7 @@ const morgan = require('morgan');
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
+const jwt = require('jsonwebtoken');
 
 const port = process.env.PORT || 5000;
 
@@ -92,6 +93,13 @@ async function run() {
 
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.json(result);
+        })
+
+        //Generating JWT token
+        app.post('/token', async (req, res) => {
+            const email = req.body.email;
+            const token = jwt.sign({ email: email }, process.env.TOKEN_SECRET, { expiresIn: '10h' });
+            return res.json({ token: token })
         })
 
         // making admin
