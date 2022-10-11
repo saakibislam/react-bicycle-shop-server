@@ -1,24 +1,28 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
+require('dotenv').config()
 const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
-require('dotenv').config()
 
 const port = process.env.PORT || 5000;
 
+// Middleware
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'))
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.be9iv.mongodb.net/${process.env.DB}?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@atlascluster.fui4cy3.mongodb.net/${process.env.DB}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
 
 async function run() {
 
     try {
         await client.connect();
 
-        const database = client.db('bicycleRide');
+        const database = client.db('Bicycle-Shop');
         const bicycleCollection = database.collection('bicycles');
         const orderCollection = database.collection('orders');
         const usersCollection = database.collection('users');
@@ -83,12 +87,11 @@ async function run() {
             const user = req.body;
 
             const filter = { email: user.email };
-            const options = { upset: true };
+            const options = { upsert: true };
             const updateDoc = { $set: user };
 
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.json(result);
-
         })
 
         // making admin
@@ -97,7 +100,6 @@ async function run() {
             const filter = { email: user.email };
             const updateDoc = { $set: { role: 'admin' } };
             const result = await usersCollection.updateOne(filter, updateDoc);
-            console.log(result);
             res.json(result);
         })
 
